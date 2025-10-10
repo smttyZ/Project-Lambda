@@ -1,0 +1,7 @@
+{
+    "clang-format.fallbackStyle": "none",
+    "clang-format.language.apex.fallbackStyle": "",
+    "clang-format.language.apex.style": "",
+    "clang-format.language.c.fallbackStyle": "",
+    "clang-format.language.c.style": ""
+}
