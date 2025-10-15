@@ -1,17 +1,42 @@
-BasedOnStyle: Google
+BasedOnStyle: LLVM
+Standard: Latest
+UseTab: Never
 IndentWidth: 4
 TabWidth: 4
-UseTab: Never
-ColumnLimit: 100
-BreakBeforeBraces: Allman
-AllowShortFunctionsOnASingleLine: Empty
-AllowShortIfStatementsOnASingleLine: false
-AllowShortLoopsOnASingleLine: false
-SpaceBeforeParens: ControlStatements
-PointerAlignment: Left
-DerivePointerAlignment: false
-SortIncludes: false
+ColumnLimit: 120
 AccessModifierOffset: -4
+BreakBeforeBraces: Attach
+AllowShortBlocksOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+BinPackArguments: false
+BinPackParameters: false
+BreakConstructorInitializers: BeforeComma
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+SpacesInParentheses: false
+SpaceAfterControlStatementKeyword: true
+SpaceBeforeParens: ControlStatements
+SpaceBeforeCpp11BracedList: false
+AlwaysBreakTemplateDeclarations: Yes
+AlwaysBreakAfterReturnType: None
+PointerAlignment: Left
+AlignOperands: AlignAfterOperator
+AlignTrailingComments: true
+SortIncludes: true
+IncludeBlocks: Preserve
+IncludeCategories:
+  - Regex: '^(<|")src/'
+    Priority: 2
+  - Regex: '^"'
+    Priority: 3
+  - Regex: '^<[^/]+>'
+    Priority: 4
+  - Regex: '.*'
+    Priority: 5
+Cpp11BracedListStyle: true
 NamespaceIndentation: All
-AlignConsecutiveAssignments: true
-AlignOperands: true
+ReflowComments: false
+SortUsingDeclarations: true
+SpacesInAngles: false
+SpaceBeforeRangeBasedForLoopColon: true

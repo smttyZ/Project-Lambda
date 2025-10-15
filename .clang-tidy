@@ -1,0 +1,65 @@
+Checks: >
+  bugprone-*,
+  cppcoreguidelines-narrowing-conversions,
+  cppcoreguidelines-owning-memory,
+  hicpp-explicit-conversions,
+  hicpp-signed-bitwise,
+  misc-throw-by-value-catch-by-reference,
+  modernize-avoid-c-arrays,
+  modernize-deprecated-headers,
+  modernize-loop-convert,
+  modernize-use-emplace,
+  modernize-use-nullptr,
+  modernize-use-override,
+  modernize-use-std-span,
+  modernize-use-using,
+  performance-*,
+  portability-simd-intrinsics,
+  readability-avoid-const-params-in-decls,
+  readability-identifier-naming,
+  readability-simplify-boolean-expr
+WarningsAsErrors: ''
+HeaderFilterRegex: '(include|src|tests)/'
+FormatStyle: file
+User: lambda
+CheckOptions:
+  - key:             readability-identifier-naming.NamespaceCase
+    value:           lower_case
+  - key:             readability-identifier-naming.TypeCase
+    value:           CamelCase
+  - key:             readability-identifier-naming.ClassCase
+    value:           CamelCase
+  - key:             readability-identifier-naming.StructCase
+    value:           CamelCase
+  - key:             readability-identifier-naming.EnumCase
+    value:           CamelCase
+  - key:             readability-identifier-naming.EnumConstantCase
+    value:           UPPER_CASE
+  - key:             readability-identifier-naming.FunctionCase
+    value:           CamelCase
+  - key:             readability-identifier-naming.MethodCase
+    value:           CamelCase
+  - key:             readability-identifier-naming.PrivateMethodCase
+    value:           camelBack
+  - key:             readability-identifier-naming.VariableCase
+    value:           camelBack
+  - key:             readability-identifier-naming.GlobalVariablePrefix
+    value:           Global
+  - key:             readability-identifier-naming.ConstantCase
+    value:           UPPER_CASE
+  - key:             readability-identifier-naming.PrivateMemberPrefix
+    value:           _
+  - key:             readability-identifier-naming.PrivateMemberCase
+    value:           camelBack
+  - key:             readability-identifier-naming.ParameterCase
+    value:           camelBack
+  - key:             readability-identifier-naming.TemplateParameterCase
+    value:           CamelCase
+  - key:             readability-identifier-naming.MacroDefinitionCase
+    value:           UPPER_CASE
+  - key:             readability-identifier-naming.MacroDefinitionPrefix
+    value:           LAMBDA_
+  - key:             readability-identifier-naming.ConceptCase
+    value:           CamelCase
+  - key:             readability-identifier-naming.EnumConstantPrefix
+    value:           ''

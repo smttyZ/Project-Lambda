@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang clang-tidy cmake ninja-build \
+            libglfw3-dev libgtest-dev
+          sudo cmake -S /usr/src/googletest -B /usr/src/googletest/build
+          sudo cmake --build /usr/src/googletest/build
+          sudo cmake --install /usr/src/googletest/build
+
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Format check
+        run: cmake --build build --target format
+
+      - name: Lint
+        run: cmake --build build --target lint
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        run: ctest --output-on-failure --test-dir build

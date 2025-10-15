@@ -12,15 +12,41 @@ find_package(GTest REQUIRED)
 # Include paths
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
+# Math library
+add_library(lambda_math INTERFACE
+        include/math/Camera.h)
+target_include_directories(lambda_math INTERFACE include)
+target_compile_features(lambda_math INTERFACE cxx_std_23)
+
+
+
 # Source files
-file(GLOB_RECURSE SRC_FILES src/*.cpp)
-add_executable(ProjectLambda ${SRC_FILES}
-        include/math/Numbers.hpp
-        include/math/Vectors.hpp
-        include/math/Matrices.hpp)
+file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS src/*.cpp)
+add_executable(ProjectLambda src/main.cpp)
+target_link_libraries(ProjectLambda PRIVATE lambda_math)
 
 # Link libs
 target_link_libraries(ProjectLambda PRIVATE glfw GTest::gtest_main)
 
 enable_testing()
 add_test(NAME LambdaTests COMMAND ProjectLambda)
+
+# Tooling targets
+set(PROJECT_FORMAT_SCRIPT ${PROJECT_SOURCE_DIR}/scripts/format.sh)
+set(PROJECT_LINT_SCRIPT ${PROJECT_SOURCE_DIR}/scripts/lint.sh)
+
+if (EXISTS ${PROJECT_FORMAT_SCRIPT})
+    add_custom_target(format
+            COMMAND ${PROJECT_FORMAT_SCRIPT}
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+            COMMENT "Formatting sources with clang-format"
+            VERBATIM)
+endif ()
+
+if (EXISTS ${PROJECT_LINT_SCRIPT})
+    add_custom_target(lint
+            COMMAND ${PROJECT_LINT_SCRIPT} ${PROJECT_BINARY_DIR}
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+            COMMENT "Running clang-tidy analysis"
+            VERBATIM)
+endif ()

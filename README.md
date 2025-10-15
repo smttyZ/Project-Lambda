@@ -21,7 +21,40 @@ The project seeks to unify concepts from computational neuroscience, physics, an
 ---
 
 ## Repository Structure
-*(to be detailed as modules are added)*
+- `include/` — Public headers exposed per domain (`math/`, `core/`, …).  
+- `src/` — Engine and experiment implementations (entry point in `src/main.cpp`).  
+- `scripts/` — Tooling helpers for formatting and static analysis.  
+- `paper/` — Research notes, references, and experiment reports.  
+- `STYLEGUIDE.md` — Canonical Project Lambda C++ style manifest.
+
+---
+
+## Getting Started
+
+### Prerequisites
+- CMake ≥ 3.20
+- A C++23 compiler (clang++ 17 / g++ 13 or newer)
+- GLFW 3.x and GoogleTest discoverable by CMake
+- `clang-format` and `clang-tidy` for style enforcement
+
+### Configure & Build
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+cmake --build build
+```
+
+### Tests
+```bash
+ctest --output-on-failure --test-dir build
+```
+
+---
+
+## Development Workflow
+- `cmake --build build --target format` — Apply the project clang-format profile.
+- `cmake --build build --target lint` — Execute clang-tidy using `.clang-tidy`.
+- `scripts/format.sh` / `scripts/lint.sh` — Direct access to the tooling from any shell.
+- Follow `STYLEGUIDE.md` for naming, documentation, and architectural rules. Extend the guide when introducing new patterns.
 
 ---
 
