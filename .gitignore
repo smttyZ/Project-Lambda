@@ -1,0 +1,15 @@
+# Build artifacts
+/build/
+/cmake-build-*/
+/CMakeCache.txt
+/CMakeFiles/
+/Makefile
+/cmake_install.cmake
+/compile_commands.json
+
+# IDE settings
+/.idea/
+/.vscode/
+
+# Temporary
+/.cache/
