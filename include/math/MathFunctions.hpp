@@ -1,69 +1,122 @@
 #pragma once
 
-#include <cmath> // for std::sin, std::cos
+#include <cmath>
+
+#include "Numbers.hpp"
 #include "core/TypeLimits.hpp"
 #include "MathConstants.hpp"
 
 namespace lambda::math {
 
-    // -- Trigonometric Table --
+    /**
+     * @brief Lookup table size for degree-based trigonometric helpers.
+     */
     inline constexpr int TRIG_TABLE_SIZE = 360;
-    inline double sinTable[TRIG_TABLE_SIZE];
-    inline double cosTable[TRIG_TABLE_SIZE];
 
+    inline Real sinTable[TRIG_TABLE_SIZE]{};
+    inline Real cosTable[TRIG_TABLE_SIZE]{};
+
+    /**
+     * @brief Initializes sine and cosine degree tables at startup.
+     */
     struct TrigTableInitializer {
         TrigTableInitializer() {
             for (int i = 0; i < TRIG_TABLE_SIZE; ++i) {
-                double radians = (lambda::math::PI / 180.0) * i;
-                sinTable[i] = std::sin(radians);
-                cosTable[i] = std::cos(radians);
+                const double radians = (lambda::math::PI / 180.0) * static_cast<double>(i);
+                sinTable[i] = Real{ std::sin(radians) };
+                cosTable[i] = Real{ std::cos(radians) };
             }
         }
     };
 
-    // Global instance: automatically initializes tables before main()
-    inline TrigTableInitializer _initTrigTables;
+    /// Global instance that ensures tables are populated before main().
+    inline TrigTableInitializer g_initTrigTables{};
 
-    // -- Sin and Cos functions --
-    inline double Sin(double degrees) {
-        int index = static_cast<int>(degrees) % TRIG_TABLE_SIZE;
-        if (index < 0) index += TRIG_TABLE_SIZE; // handle negative angles
+    /**
+     * @brief Returns a fast sine approximation using the degree lookup table.
+     */
+    inline Real SinDegrees(Real degrees) {
+        int index = static_cast<int>(degrees.value) % TRIG_TABLE_SIZE;
+        if (index < 0) {
+            index += TRIG_TABLE_SIZE;
+        }
         return sinTable[index];
     }
 
-    inline double Cos(double degrees) {
-        int index = static_cast<int>(degrees) % TRIG_TABLE_SIZE;
-        if (index < 0) index += TRIG_TABLE_SIZE;
+    /// Backwards-compatible overload that accepts a double angle.
+    inline Real SinDegrees(double degrees) { return SinDegrees(Real{ degrees }); }
+    /// Alias preserved for existing code.
+    inline Real Sin(Real degrees) { return SinDegrees(degrees); }
+    /// Alias preserved for double input.
+    inline Real Sin(double degrees) { return SinDegrees(Real{ degrees }); }
+
+    /**
+     * @brief Returns a fast cosine approximation using the degree lookup table.
+     */
+    inline Real CosDegrees(Real degrees) {
+        int index = static_cast<int>(degrees.value) % TRIG_TABLE_SIZE;
+        if (index < 0) {
+            index += TRIG_TABLE_SIZE;
+        }
         return cosTable[index];
     }
 
-    // -- Circle functions --
-    constexpr double CircleCircumference(double radius) {
-        return 2.0 * lambda::math::PI * radius;
+    /// Backwards-compatible overload that accepts a double angle.
+    inline Real CosDegrees(double degrees) { return CosDegrees(Real{ degrees }); }
+    /// Alias preserved for existing code.
+    inline Real Cos(Real degrees) { return CosDegrees(degrees); }
+    /// Alias preserved for double input.
+    inline Real Cos(double degrees) { return CosDegrees(Real{ degrees }); }
+
+    /**
+     * @brief Computes the circumference of a circle.
+     *
+     * @param radius Circle radius measured in meters (or consistent unit).
+     */
+    inline Real CircleCircumference(Real radius) {
+        return Real{ 2.0 } * Real{ PI } * radius;
     }
 
-    constexpr double CircleArea(double radius) {
-        return lambda::math::PI * radius * radius;
+    /**
+     * @brief Computes the area of a circle.
+     */
+    inline Real CircleArea(Real radius) {
+        return Real{ PI } * radius * radius;
     }
 
-    constexpr double CircleDiameter(double radius) {
-        return 2.0 * radius;
+    /**
+     * @brief Computes the diameter of a circle.
+     */
+    inline Real CircleDiameter(Real radius) {
+        return Real{ 2.0 } * radius;
     }
 
-    constexpr double ArcLength(double radius, double angle) {
-        return radius * angle; // angle in radians
+    /**
+     * @brief Computes arc length when the angle is expressed in radians.
+     */
+    inline Real ArcLength(Real radius, Real angleRadians) {
+        return radius * angleRadians;
     }
 
-    constexpr double ArcLengthDegrees(double radius, double angleDegrees) {
-        return ArcLength(radius, angleDegrees * lambda::math::DEG2RAD);
+    /**
+     * @brief Computes arc length when the angle is expressed in degrees.
+     */
+    inline Real ArcLengthDegrees(Real radius, Real angleDegrees) {
+        return ArcLength(radius, Real{ angleDegrees.value * DEG2RAD });
     }
 
-    constexpr double SectorArea(double radius, double angle) {
-        return 0.5 * radius * radius * angle; // angle in radians
+    /**
+     * @brief Computes the area of a sector when the angle is expressed in radians.
+     */
+    inline Real SectorArea(Real radius, Real angleRadians) {
+        return Real{ 0.5 } * radius * radius * angleRadians;
     }
 
-    constexpr double SectorAreaDegrees(double radius, double angleDegrees) {
-        return SectorArea(radius, angleDegrees * lambda::math::DEG2RAD);
+    /**
+     * @brief Computes the area of a sector when the angle is expressed in degrees.
+     */
+    inline Real SectorAreaDegrees(Real radius, Real angleDegrees) {
+        return SectorArea(radius, Real{ angleDegrees.value * DEG2RAD });
     }
 
 } // namespace lambda::math

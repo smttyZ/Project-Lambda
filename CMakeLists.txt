@@ -14,7 +14,10 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 
 # Source files
 file(GLOB_RECURSE SRC_FILES src/*.cpp)
-add_executable(ProjectLambda ${SRC_FILES})
+add_executable(ProjectLambda ${SRC_FILES}
+        include/math/Numbers.hpp
+        include/math/Vectors.hpp
+        include/math/Matrices.hpp)
 
 # Link libs
 target_link_libraries(ProjectLambda PRIVATE glfw GTest::gtest_main)
