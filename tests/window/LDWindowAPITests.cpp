@@ -1,5 +1,5 @@
-// main.cpp
-// Project Lambda - Application entry point
+// LDWindowAPITests.cpp
+// Project Lambda - LDWindow API tests
 // Copyright (C) 2025
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,16 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <iostream>
+#include <gtest/gtest.h>
 
-/**
- * @brief Application entry point for the Project Lambda prototype.
- *
- * Prints a diagnostic string so build and runtime wiring can be validated quickly.
- *
- * @return Zero on success, non-zero otherwise.
- */
-int main() {
-    std::cout << "Hello World!\n";
-    return 0;
+#include "window/LDWindowAPI.hpp"
+
+TEST(LDWindowAPI, Availability_ReturnsTrue) {
+    EXPECT_TRUE(lambda::window::IsAvailable());
 }

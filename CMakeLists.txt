@@ -18,18 +18,27 @@ add_library(lambda_math INTERFACE
 target_include_directories(lambda_math INTERFACE include)
 target_compile_features(lambda_math INTERFACE cxx_std_23)
 
+add_library(LDWindow SHARED
+        src/LDWindowAPI.cpp)
+target_include_directories(LDWindow PUBLIC include)
+target_compile_features(LDWindow PUBLIC cxx_std_23)
+
 
 
 # Source files
 file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS src/*.cpp)
 add_executable(ProjectLambda src/main.cpp)
-target_link_libraries(ProjectLambda PRIVATE lambda_math)
+target_link_libraries(ProjectLambda PRIVATE lambda_math LDWindow)
 
 # Link libs
-target_link_libraries(ProjectLambda PRIVATE glfw GTest::gtest_main)
+target_link_libraries(ProjectLambda PRIVATE glfw)
+
+add_executable(LDWindowTests
+        tests/window/LDWindowAPITests.cpp)
+target_link_libraries(LDWindowTests PRIVATE LDWindow GTest::gtest_main)
 
 enable_testing()
-add_test(NAME LambdaTests COMMAND ProjectLambda)
+add_test(NAME LDWindowTests COMMAND LDWindowTests)
 
 # Tooling targets
 set(PROJECT_FORMAT_SCRIPT ${PROJECT_SOURCE_DIR}/scripts/format.sh)
