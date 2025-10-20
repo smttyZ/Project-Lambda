@@ -12,12 +12,11 @@
 // limitations under the License.
 
 #include <GLFW/glfw3.h>
+#include "window/LDWindowAPI.hpp"
 
 #include <chrono>
 #include <iostream>
 #include <thread>
-
-#include "window/LDWindowAPI.hpp"
 
 /**
  * @brief Application entry point for the Project Lambda prototype.
