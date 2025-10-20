@@ -13,6 +13,7 @@
 
 #pragma once
 
+#include <array>
 #include <cmath>
 
 #include "Numbers.hpp"
@@ -24,36 +25,93 @@ namespace lambda::math {
     /**
      * @brief Lookup table size for degree-based trigonometric helpers.
      */
-    inline constexpr int TRIG_TABLE_SIZE = 360;
+    inline constexpr int TRIG_TABLE_SIZE = 3600;
+    inline constexpr double TRIG_STEP_DEGREES = 360.0 / static_cast<double>(TRIG_TABLE_SIZE);
 
-    inline Real sinTable[TRIG_TABLE_SIZE]{};
-    inline Real cosTable[TRIG_TABLE_SIZE]{};
-
-    /**
-     * @brief Initializes sine and cosine degree tables at startup.
-     */
-    struct TrigTableInitializer {
-        TrigTableInitializer() {
-            for (int i = 0; i < TRIG_TABLE_SIZE; ++i) {
-                const double radians = (lambda::math::PI / 180.0) * static_cast<double>(i);
-                sinTable[i] = Real{ std::sin(radians) };
-                cosTable[i] = Real{ std::cos(radians) };
+    namespace detail {
+        constexpr double NormalizeRadians(double radians) {
+            double value = radians;
+            while (value > TWO_PI) {
+                value -= TWO_PI;
             }
+            while (value < 0.0) {
+                value += TWO_PI;
+            }
+            if (value > PI) {
+                value -= TWO_PI;
+            }
+            return value;
         }
-    };
 
-    /// Global instance that ensures tables are populated before main().
-    inline TrigTableInitializer g_initTrigTables{};
+        constexpr double SinSeries(double radians) {
+            const double x = NormalizeRadians(radians);
+            double term = x;
+            double sum = term;
+            const double xSquared = x * x;
+            for (int n = 1; n <= 12; ++n) {
+                const double denominator = static_cast<double>((2 * n) * (2 * n + 1));
+                term *= -xSquared / denominator;
+                sum += term;
+            }
+            return sum;
+        }
+
+        constexpr double CosSeries(double radians) {
+            const double x = NormalizeRadians(radians);
+            double term = 1.0;
+            double sum = term;
+            const double xSquared = x * x;
+            for (int n = 1; n <= 12; ++n) {
+                const double denominator = static_cast<double>((2 * n - 1) * (2 * n));
+                term *= -xSquared / denominator;
+                sum += term;
+            }
+            return sum;
+        }
+
+        template<typename Func>
+        consteval std::array<Real, TRIG_TABLE_SIZE> BuildTrigTable(Func func) {
+            std::array<Real, TRIG_TABLE_SIZE> table{};
+            for (int i = 0; i < TRIG_TABLE_SIZE; ++i) {
+                const double degrees = static_cast<double>(i) * TRIG_STEP_DEGREES;
+                const double radians = degrees * DEG2RAD;
+                table[static_cast<std::size_t>(i)] = Real{ func(radians) };
+            }
+            return table;
+        }
+
+        inline constexpr std::array<Real, TRIG_TABLE_SIZE> SIN_TABLE =
+            BuildTrigTable([](double radians) { return SinSeries(radians); });
+        inline constexpr std::array<Real, TRIG_TABLE_SIZE> COS_TABLE =
+            BuildTrigTable([](double radians) { return CosSeries(radians); });
+
+        inline double NormalizeDegrees(double degrees) {
+            double result = std::fmod(degrees, 360.0);
+            if (result < 0.0) {
+                result += 360.0;
+            }
+            return result;
+        }
+
+        inline Real LerpTable(const std::array<Real, TRIG_TABLE_SIZE>& table, Real degrees) {
+            const double normalized = NormalizeDegrees(degrees.value);
+            const double scaled = normalized / TRIG_STEP_DEGREES;
+            const double index = std::floor(scaled);
+            const int baseIndex = static_cast<int>(index) % TRIG_TABLE_SIZE;
+            const double fraction = scaled - index;
+            const int nextIndex = (baseIndex + 1) % TRIG_TABLE_SIZE;
+
+            const double v0 = table[static_cast<std::size_t>(baseIndex)].value;
+            const double v1 = table[static_cast<std::size_t>(nextIndex)].value;
+            return Real{ v0 + (v1 - v0) * fraction };
+        }
+    } // namespace detail
 
     /**
      * @brief Returns a fast sine approximation using the degree lookup table.
      */
     inline Real SinDegrees(Real degrees) {
-        int index = static_cast<int>(degrees.value) % TRIG_TABLE_SIZE;
-        if (index < 0) {
-            index += TRIG_TABLE_SIZE;
-        }
-        return sinTable[index];
+        return detail::LerpTable(detail::SIN_TABLE, degrees);
     }
 
     /// Backwards-compatible overload that accepts a double angle.
@@ -67,11 +125,7 @@ namespace lambda::math {
      * @brief Returns a fast cosine approximation using the degree lookup table.
      */
     inline Real CosDegrees(Real degrees) {
-        int index = static_cast<int>(degrees.value) % TRIG_TABLE_SIZE;
-        if (index < 0) {
-            index += TRIG_TABLE_SIZE;
-        }
-        return cosTable[index];
+        return detail::LerpTable(detail::COS_TABLE, degrees);
     }
 
     /// Backwards-compatible overload that accepts a double angle.

@@ -22,6 +22,7 @@ add_library(LDWindow SHARED
         src/LDWindowAPI.cpp)
 target_include_directories(LDWindow PUBLIC include)
 target_compile_features(LDWindow PUBLIC cxx_std_23)
+target_link_libraries(LDWindow PRIVATE glfw)
 
 
 
@@ -34,11 +35,21 @@ target_link_libraries(ProjectLambda PRIVATE lambda_math LDWindow)
 target_link_libraries(ProjectLambda PRIVATE glfw)
 
 add_executable(LDWindowTests
-        tests/window/LDWindowAPITests.cpp)
+        tests/window/LDWindowAPITests.cpp
+        tests/window/LDWindowBlankWindowTests.cpp)
 target_link_libraries(LDWindowTests PRIVATE LDWindow GTest::gtest_main)
+
+add_executable(MathTests
+        tests/math/NumbersTests.cpp
+        tests/math/VectorsTests.cpp
+        tests/math/MatricesTests.cpp
+        tests/math/CameraTests.cpp
+        tests/math/MathFunctionsTests.cpp)
+target_link_libraries(MathTests PRIVATE GTest::gtest_main)
 
 enable_testing()
 add_test(NAME LDWindowTests COMMAND LDWindowTests)
+add_test(NAME MathTests COMMAND MathTests)
 
 # Tooling targets
 set(PROJECT_FORMAT_SCRIPT ${PROJECT_SOURCE_DIR}/scripts/format.sh)

@@ -13,6 +13,8 @@
 
 #pragma once
 
+struct GLFWwindow;
+
 namespace lambda::window {
 /**
  * @brief Reports whether the LDWindow subsystem is ready for use.
@@ -23,4 +25,18 @@ namespace lambda::window {
  * @return True when LDWindow is available.
  */
 [[nodiscard]] bool IsAvailable() noexcept;
+
+/**
+ * @brief Creates a blank GLFW window and returns its handle.
+ *
+ * The window is configured with an OpenGL 3.3 core profile context, V-Sync enabled,
+ * and the provided dimensions and title. A null pointer is returned when initialization
+ * fails or invalid parameters are supplied.
+ */
+[[nodiscard]] GLFWwindow* CreateBlankWindow(int width, int height, const char* title) noexcept;
+
+/**
+ * @brief Releases a GLFW window previously created by @ref CreateBlankWindow.
+ */
+void DestroyWindow(GLFWwindow* window) noexcept;
 } // namespace lambda::window

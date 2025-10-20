@@ -11,7 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <GLFW/glfw3.h>
+
+#include <chrono>
 #include <iostream>
+#include <thread>
+
+#include "window/LDWindowAPI.hpp"
 
 /**
  * @brief Application entry point for the Project Lambda prototype.
@@ -21,6 +27,28 @@
  * @return Zero on success, non-zero otherwise.
  */
 int main() {
-    std::cout << "Hello World!\n";
+    constexpr int kWidth = 800;
+    constexpr int kHeight = 600;
+    constexpr const char* kTitle = "Project Lambda";
+
+    if (!lambda::window::IsAvailable()) {
+        std::cerr << "LDWindow subsystem unavailable\n";
+        return 1;
+    }
+
+    GLFWwindow* window = lambda::window::CreateBlankWindow(kWidth, kHeight, kTitle);
+    if (window == nullptr) {
+        std::cerr << "Failed to create GLFW window\n";
+        return 1;
+    }
+
+    std::cout << "Window created successfully\n";
+
+    while (!glfwWindowShouldClose(window)) {
+        glfwPollEvents();
+        std::this_thread::sleep_for(std::chrono::milliseconds(16));
+    }
+
+    lambda::window::DestroyWindow(window);
     return 0;
 }
