@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 namespace lambda::gpu { 
 /**
  * @brief Represents a submission queue for render commands targeting the GPU.
@@ -11,11 +13,13 @@ struct RenderCommand {
     // Placeholder for mesh, material, transform, etc.
 };
 
-class GPURenderQueue {
+class GPURenderQueue final {
 public:
-    virtual ~GPURenderQueue() = default;
+    void EnqueueCommand(const RenderCommand& command);
+    void Clear() noexcept;
+    [[nodiscard]] const std::vector<RenderCommand>& Commands() const noexcept;
 
-    /// Submits a render command for execution on the GPU.
-    virtual void Submit(const RenderCommand& cmd) noexcept = 0;
+private:
+    std::vector<RenderCommand> _commands;
 };
 } // namespace lambda::gpu
