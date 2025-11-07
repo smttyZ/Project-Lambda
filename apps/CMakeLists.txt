@@ -18,6 +18,7 @@ add_executable(lambda
 
 target_link_libraries(lambda
     PRIVATE
+        LambdaCore
         LambdaEngine
         LambdaPhysics
         LambdaProme
@@ -29,5 +30,5 @@ enable_testing()
 add_executable(PhysicsTests
     ${PROJECT_SOURCE_DIR}/tests/physics/PhysicsWorldTests.cpp
 )
-target_link_libraries(PhysicsTests PRIVATE LambdaPhysics GTest::gtest_main)
+target_link_libraries(PhysicsTests PRIVATE LambdaCore LambdaPhysics GTest::gtest_main)
 add_test(NAME PhysicsTests COMMAND PhysicsTests)

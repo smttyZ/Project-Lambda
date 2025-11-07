@@ -13,6 +13,7 @@
 
 # Physics Engine Module
 add_library(LambdaPhysics STATIC
+    src/RigidBody.cpp
     src/PhysicsWorld.cpp
     src/CollisionSystem.cpp
 )
@@ -22,7 +23,7 @@ target_include_directories(LambdaPhysics
 )
 
 target_compile_features(LambdaPhysics PUBLIC cxx_std_23)
-target_link_libraries(LambdaPhysics PUBLIC lambda_math)
+target_link_libraries(LambdaPhysics PUBLIC LambdaCore lambda_math)
 
 # Optional CLI for physics subsystem
 add_executable(lambda-cli

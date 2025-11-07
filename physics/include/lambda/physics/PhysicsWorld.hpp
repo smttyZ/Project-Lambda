@@ -3,7 +3,7 @@
 // Copyright (C) 2025
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+// You may obtain a copy at http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,9 +14,10 @@
 #pragma once
 
 #include <core/Real.hpp>
+#include <core/Clock.hpp>
 #include <lambda/physics/IRigidBody.hpp>
 
-#include "static/Clock.hpp"
+#include <vector>
 
 namespace lambda::physics {
 
@@ -25,7 +26,14 @@ namespace lambda::physics {
  */
 class PhysicsWorld final {
 public:
+    /**
+     * @brief Constructor.
+     */
     PhysicsWorld();
+
+    /**
+     * @brief Destructor.
+     */
     ~PhysicsWorld();
 
     /**
@@ -72,12 +80,33 @@ public:
     [[nodiscard]] bool TryRemoveRigidBody(IRigidBody* body);
 
 private:
+    /**
+     * @brief Applies global forces (e.g., gravity) to all bodies.
+     */
     void ApplyGlobalForces();
+
+    /**
+     * @brief Integrates all bodies forward in time using semi-implicit Euler.
+     * @param dt Time step in seconds.
+     */
     void IntegrateBodies(lambda::core::Real dt);
+
+    /**
+     * @brief Detects collisions between rigid bodies.
+     */
     void DetectCollisions();
+
+    /**
+     * @brief Resolves detected collisions.
+     */
     void ResolveCollisions();
+
+    /**
+     * @brief Clears force and torque accumulators on all bodies.
+     */
     void ClearAccumulators();
 
+    std::vector<IRigidBody*> _rigidBodies;
     double _simulationTime{0.0};
 };
 

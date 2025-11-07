@@ -1,5 +1,5 @@
-# prome/CMakeLists.txt
-# Project Lambda - Prometheus AI module build rules
+# core/CMakeLists.txt
+# Project Lambda - Core module build rules
 # Copyright (C) 2025
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,14 +11,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Artificial Agents (Prometheus Engine)
-add_library(LambdaProme STATIC
-    src/AgentSystem.cpp
-    src/BehaviorGraph.cpp
+# Core Module (header-only)
+add_library(LambdaCore INTERFACE)
+
+target_include_directories(LambdaCore
+    INTERFACE
+        ${CMAKE_CURRENT_SOURCE_DIR}/..
 )
 
-target_include_directories(LambdaProme
-    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-)
-target_compile_features(LambdaProme PUBLIC cxx_std_23)
-target_link_libraries(LambdaProme PUBLIC LambdaCore lambda_math)
+target_compile_features(LambdaCore INTERFACE cxx_std_23)
+

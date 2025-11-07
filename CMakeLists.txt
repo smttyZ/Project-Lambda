@@ -39,6 +39,7 @@ FetchContent_MakeAvailable(googletest)
 # ---------------------------------------------------------------
 # Subprojects
 # ---------------------------------------------------------------
+add_subdirectory(core)
 add_subdirectory(physics)
 add_subdirectory(engine)
 add_subdirectory(prome)
