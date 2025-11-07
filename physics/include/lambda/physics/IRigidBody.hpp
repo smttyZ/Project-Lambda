@@ -30,6 +30,7 @@ enum class RigidBodyStatus : std::uint8_t {
     INVALID_MASS = 1,
     INVALID_POSITION = 2,
     INVALID_VELOCITY = 3,
+    INVALID_ORIENTATION = 4,
 };
 
 /**

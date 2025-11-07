@@ -62,6 +62,18 @@ public:
     [[nodiscard]] std::array<lambda::core::Real, 9> GetInertiaTensor() const noexcept override;
 
     /**
+     * @brief Returns the current orientation matrix (row-major 3x3).
+     */
+    [[nodiscard]] std::array<lambda::core::Real, 9> GetOrientationMatrix() const noexcept;
+
+    /**
+     * @brief Sets the current orientation matrix (row-major 3x3).
+     * @param orientation Orientation matrix coefficients.
+     * @return Validation status describing whether @p orientation was accepted.
+     */
+    [[nodiscard]] RigidBodyStatus SetOrientationMatrix(const std::array<lambda::core::Real, 9>& orientation);
+
+    /**
      * @brief Returns the inverse mass (1 / mass).
      * @return Inverse mass value.
      */
@@ -141,6 +153,11 @@ private:
     lambda::core::Real _inverseMass{};
     std::array<lambda::core::Real, 9> _inertiaTensor{};
     std::array<lambda::core::Real, 9> _inverseInertiaTensor{};
+    std::array<lambda::core::Real, 9> _orientationMatrix{
+        lambda::core::Real{1.0}, lambda::core::Real{0.0}, lambda::core::Real{0.0},
+        lambda::core::Real{0.0}, lambda::core::Real{1.0}, lambda::core::Real{0.0},
+        lambda::core::Real{0.0}, lambda::core::Real{0.0}, lambda::core::Real{1.0}
+    };
 
     std::array<lambda::core::Real, 3> _position{};
     std::array<lambda::core::Real, 3> _linearVelocity{};

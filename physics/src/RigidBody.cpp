@@ -13,7 +13,9 @@
 
 #include <lambda/physics/RigidBody.hpp>
 
+#include <core/Matrix3.hpp>
 #include <core/Real.hpp>
+#include <core/Vector3.hpp>
 
 namespace lambda::physics {
 
@@ -80,6 +82,23 @@ RigidBodyStatus RigidBody::SetInertiaTensor(const std::array<lambda::core::Real,
 
 std::array<lambda::core::Real, 9> RigidBody::GetInertiaTensor() const noexcept {
     return _inertiaTensor;
+}
+
+std::array<lambda::core::Real, 9> RigidBody::GetOrientationMatrix() const noexcept {
+    return _orientationMatrix;
+}
+
+RigidBodyStatus RigidBody::SetOrientationMatrix(const std::array<lambda::core::Real, 9>& orientation) {
+    for (const auto& component : orientation) {
+        try {
+            [[maybe_unused]] const auto probe = component;
+        } catch (...) {
+            return RigidBodyStatus::INVALID_ORIENTATION;
+        }
+    }
+
+    _orientationMatrix = orientation;
+    return RigidBodyStatus::OK;
 }
 
 lambda::core::Real RigidBody::GetInverseMass() const noexcept {
@@ -161,16 +180,13 @@ void RigidBody::ApplyImpulseAtPoint(const std::array<lambda::core::Real, 3>& imp
     const auto torqueY = relativePosition[2] * impulse[0] - relativePosition[0] * impulse[2];
     const auto torqueZ = relativePosition[0] * impulse[1] - relativePosition[1] * impulse[0];
 
-    // Apply angular impulse using inverse inertia tensor (simplified for diagonal case)
-    // For full 3x3 tensor, we'd need matrix-vector multiplication
-    // For now, assume diagonal inertia tensor for simplicity
-    const auto invIxx = _inverseInertiaTensor[0];  // [0][0]
-    const auto invIyy = _inverseInertiaTensor[4];  // [1][1]
-    const auto invIzz = _inverseInertiaTensor[8];  // [2][2]
+    const lambda::core::Vector3 torqueVector{torqueX, torqueY, torqueZ};
+    const lambda::core::Matrix3 inverseInertia{_inverseInertiaTensor};
+    const auto deltaAngularVelocity = inverseInertia * torqueVector;
 
-    _angularVelocity[0] = _angularVelocity[0] + torqueX * invIxx;
-    _angularVelocity[1] = _angularVelocity[1] + torqueY * invIyy;
-    _angularVelocity[2] = _angularVelocity[2] + torqueZ * invIzz;
+    _angularVelocity[0] = _angularVelocity[0] + deltaAngularVelocity.GetX();
+    _angularVelocity[1] = _angularVelocity[1] + deltaAngularVelocity.GetY();
+    _angularVelocity[2] = _angularVelocity[2] + deltaAngularVelocity.GetZ();
 }
 
 void RigidBody::ClearAccumulators() noexcept {
@@ -216,4 +232,3 @@ void RigidBody::ComputeInverseInertiaTensor() {
 }
 
 } // namespace lambda::physics
-

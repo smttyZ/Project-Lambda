@@ -18,6 +18,8 @@
 
 #include <array>
 #include <cstddef>
+#include <cmath>
+#include <limits>
 
 namespace lambda::core {
 
@@ -313,8 +315,81 @@ public:
      */
     Matrix3& operator/=(Real scalar) noexcept;
 
+    /**
+     * @brief Re-orthonormalizes the matrix columns using Gram-Schmidt.
+     */
+    void Orthonormalize() noexcept;
+
+    /**
+     * @brief Computes the exponential map of a skew-symmetric matrix.
+     * @param skew Skew-symmetric matrix representing angular velocity (ω×).
+     * @return Matrix exponential exp(skew).
+     */
+    [[nodiscard]] static Matrix3 Exp(const Matrix3& skew) noexcept;
+
 private:
     Real _m[3][3]{};  // Row-major storage
 };
 
 } // namespace lambda::core
+
+inline void Matrix3::Orthonormalize() noexcept {
+    const auto makeSafeUnit = [](const Vector3& candidate, const Vector3& fallback) noexcept -> Vector3 {
+        const auto epsilon = Real{1e-8};
+        if (candidate.LengthSquared() <= epsilon) {
+            return fallback;
+        }
+        return candidate.Normalized();
+    };
+
+    auto col0 = GetColumn(0);
+    auto col1 = GetColumn(1);
+    auto col2 = GetColumn(2);
+
+    col0 = makeSafeUnit(col0, Vector3{Real{1.0}, Real{0.0}, Real{0.0}});
+
+    const auto dot01 = col0.Dot(col1);
+    col1 = Vector3{
+        col1.GetX() - col0.GetX() * dot01,
+        col1.GetY() - col0.GetY() * dot01,
+        col1.GetZ() - col0.GetZ() * dot01
+    };
+    col1 = makeSafeUnit(col1, Vector3{Real{0.0}, Real{1.0}, Real{0.0}});
+
+    col2 = col0.Cross(col1);
+    col2 = makeSafeUnit(col2, Vector3{Real{0.0}, Real{0.0}, Real{1.0}});
+
+    SetColumn(0, col0);
+    SetColumn(1, col1);
+    SetColumn(2, col2);
+}
+
+inline Matrix3 Matrix3::Exp(const Matrix3& skew) noexcept {
+    const double wx = skew.Get(2, 1).Value();
+    const double wy = skew.Get(0, 2).Value();
+    const double wz = skew.Get(1, 0).Value();
+
+    const double thetaSquared = wx * wx + wy * wy + wz * wz;
+    const double theta = std::sqrt(thetaSquared);
+
+    const Matrix3 identity = Matrix3::Identity();
+    const Matrix3 skewSquared = skew * skew;
+
+    const double eps = std::numeric_limits<double>::epsilon();
+    double sinTerm = 0.0;
+    double cosTerm = 0.0;
+
+    if (thetaSquared < eps) {
+        // Use series expansion for small angles
+        sinTerm = 1.0 - thetaSquared / 6.0;
+        cosTerm = 0.5 - thetaSquared / 24.0;
+    } else {
+        sinTerm = std::sin(theta) / theta;
+        cosTerm = (1.0 - std::cos(theta)) / thetaSquared;
+    }
+
+    const Real sinCoeff{sinTerm};
+    const Real cosCoeff{cosTerm};
+
+    return identity + (skew * sinCoeff) + (skewSquared * cosCoeff);
+}

@@ -13,13 +13,14 @@
 
 #pragma once
 
-#include <core/Real.hpp>
 #include <core/Clock.hpp>
-#include <lambda/physics/IRigidBody.hpp>
+#include <core/Real.hpp>
 
 #include <vector>
 
 namespace lambda::physics {
+
+class RigidBody;
 
 /**
  * @brief Orchestrates integration, collision detection, and solver passes for rigid bodies.
@@ -48,36 +49,27 @@ public:
     void Simulate(lambda::core::Real dt);
 
     /**
+     * @brief Returns the accumulated simulation time.
+     */
+    [[nodiscard]] lambda::core::Real GetSimulationTime() const;
+
+    /**
      * @brief Registers a rigid body with the world.
      * @param body Instance to register; must outlive the world or be explicitly removed.
      */
-    void AddRigidBody(IRigidBody* body);
+    [[nodiscard]] bool AddRigidBody(RigidBody* body);
 
     /**
      * @brief Removes a rigid body that was previously registered.
      * @param body Instance to remove.
      */
-    void RemoveRigidBody(IRigidBody* body);
+    [[nodiscard]] bool RemoveRigidBody(RigidBody* body);
 
     /**
      * @brief Synchronizes world state back to the owning systems after simulation.
      * @param waitForResults When true, blocks until outstanding integration completes.
      */
-    void FetchResults(bool waitForResults = true);
-
-    /**
-     * @brief Attempts to register a body but reports failure instead of throwing.
-     * @param body Instance to register.
-     * @return true when the body is registered successfully.
-     */
-    [[nodiscard]] bool TryAddRigidBody(IRigidBody* body);
-
-    /**
-     * @brief Attempts to remove a body but reports failure instead of throwing.
-     * @param body Instance to remove.
-     * @return true when the body is removed successfully.
-     */
-    [[nodiscard]] bool TryRemoveRigidBody(IRigidBody* body);
+    void FetchResults(bool waitForResults = true) noexcept;
 
 private:
     /**
@@ -101,13 +93,8 @@ private:
      */
     void ResolveCollisions();
 
-    /**
-     * @brief Clears force and torque accumulators on all bodies.
-     */
-    void ClearAccumulators();
-
-    std::vector<IRigidBody*> _rigidBodies;
-    double _simulationTime{0.0};
+    std::vector<RigidBody*> _rigidBodies;
+    long double _simulationTimeSeconds{0.0L};
 };
 
 } // namespace lambda::physics

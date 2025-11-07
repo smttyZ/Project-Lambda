@@ -45,6 +45,9 @@ add_subdirectory(engine)
 add_subdirectory(prome)
 add_subdirectory(apps)
 
+enable_testing()
+add_subdirectory(tests)
+
 # ---------------------------------------------------------------
 # Tooling targets (format & lint)
 # ---------------------------------------------------------------
