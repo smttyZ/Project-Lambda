@@ -1,5 +1,5 @@
-// SphereCollider.hpp
-// Project Lambda - Physics sphere collider definition
+// AABBCollider.hpp
+// Project Lambda - Physics axis-aligned bounding-box collider definition
 // Copyright (C) 2025
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,16 +20,17 @@
 namespace lambda::physics::colliders {
 
 /**
- * @brief Concrete sphere collider defined by a center and radius.
+ * @brief Collider defined by minimum and maximum extents aligned to the world axes.
  */
-class SphereCollider final : public ICollider {
+class AABBCollider final : public ICollider {
 public:
     /**
-     * @brief Constructs a sphere collider using a center and radius.
-     * @param center World-space center.
-     * @param radius Sphere radius.
+     * @brief Constructs an AABB from minimum and maximum extents.
+     * @param minPoint Minimum corner (world space).
+     * @param maxPoint Maximum corner (world space).
      */
-    SphereCollider(std::array<lambda::core::Real, 3> center, lambda::core::Real radius) noexcept;
+    AABBCollider(std::array<lambda::core::Real, 3> minPoint,
+                 std::array<lambda::core::Real, 3> maxPoint) noexcept;
 
     /**
      * @brief Tests overlap with another collider instance.
@@ -39,20 +40,26 @@ public:
     [[nodiscard]] bool Intersects(const ICollider& other) const noexcept override;
 
     /**
-     * @brief Returns the world-space center.
+     * @brief Returns the collider center.
      * @return Center coordinates.
      */
     [[nodiscard]] std::array<lambda::core::Real, 3> GetCenter() const noexcept override;
 
     /**
-     * @brief Returns the radius in meters.
-     * @return Sphere radius.
+     * @brief Returns the minimum world-space corner.
+     * @return Minimum corner coordinates.
      */
-    [[nodiscard]] lambda::core::Real GetRadius() const noexcept;
+    [[nodiscard]] std::array<lambda::core::Real, 3> GetMinPoint() const noexcept;
+
+    /**
+     * @brief Returns the maximum world-space corner.
+     * @return Maximum corner coordinates.
+     */
+    [[nodiscard]] std::array<lambda::core::Real, 3> GetMaxPoint() const noexcept;
 
 private:
-    std::array<lambda::core::Real, 3> _center{};
-    lambda::core::Real _radius{};
+    std::array<lambda::core::Real, 3> _minPoint{};
+    std::array<lambda::core::Real, 3> _maxPoint{};
 };
 
 } // namespace lambda::physics::colliders

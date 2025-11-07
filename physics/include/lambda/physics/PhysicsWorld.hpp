@@ -1,80 +1,84 @@
+// PhysicsWorld.hpp
+// Project Lambda - High level physics world coordination interface
+// Copyright (C) 2025
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 #pragma once
 
-#include "static/Clock.hpp"
 #include <core/Real.hpp>
+#include <lambda/physics/IRigidBody.hpp>
 
-// note: stop putting [[nodiscard]] on void functions
-// they already return nothing, so there's nothing to discard
+#include "static/Clock.hpp"
 
-class PhysicsWorld {
+namespace lambda::physics {
+
+/**
+ * @brief Orchestrates integration, collision detection, and solver passes for rigid bodies.
+ */
+class PhysicsWorld final {
 public:
-
-namespace core = lambda::core;
-namespace physics = lambda::physics;
-
     PhysicsWorld();
     ~PhysicsWorld();
 
     /**
-     * @brief Initializes the physics world.
-     * @return True if initialization was successful, false otherwise.
-     * @note Bang = big bang of universe, aka world.
+     * @brief Initializes global state and prepares integration data structures.
      */
     void Bang();
 
     /**
-     * @brief Steps the physics simulation forward by the specified time delta.
-     * @param dt Time step in seconds.
+     * @brief Advances the simulation by @p dt seconds.
+     * @param dt Time step expressed in seconds.
      */
-    void Simulate(const lambda::core::Real dt);
+    void Simulate(lambda::core::Real dt);
 
     /**
-     * @brief Adds a rigid body to the physics world.
-     * @param body Pointer to the rigid body to add.
-     * @note This function assumes the body is valid and DOES NOT perform any checks.
+     * @brief Registers a rigid body with the world.
+     * @param body Instance to register; must outlive the world or be explicitly removed.
      */
-    void AddRigidBody(void* body);
+    void AddRigidBody(IRigidBody* body);
 
     /**
-     * @brief Removes a rigid body from the physics world.
-     * @param body Pointer to the rigid body to remove.
-     * @note This function assumes the body is valid and DOES NOT perform any checks.
+     * @brief Removes a rigid body that was previously registered.
+     * @param body Instance to remove.
      */
-    void RemoveRigidBody(void* body);
+    void RemoveRigidBody(IRigidBody* body);
 
     /**
-     * @brief Fetches the results of the physics simulation.
-     * @param p If true, blocks until the results are available. p = patience.
-     * @note This function updates the state of all rigid bodies in the world based on the simulation results.
-     * WARNING: Using p = false may lead to undefined behavior if the simulation results are not ready.
+     * @brief Synchronizes world state back to the owning systems after simulation.
+     * @param waitForResults When true, blocks until outstanding integration completes.
      */
-    void FetchResults(bool p = true);
-
-    // EXPERIMENTAL FEATURES
-    /**
-     * @brief Attempts to add a rigid body to the physics world.
-     * @param body Pointer to the rigid body to add.
-     * @return True if the body was successfully added, false otherwise.
-     * @note This is an experimental feature and may not work as intended.
-     * It's intention, is to function as a catch-try block without... a catch-try block.
-     */
-    [[nodiscard]] bool TryAddRigidBody(void* body);
+    void FetchResults(bool waitForResults = true);
 
     /**
-     * @brief Attempts to remove a rigid body from the physics world.
-     * @param body Pointer to the rigid body to remove.
-     * @return True if the body was successfully removed, false otherwise.
-     * @note This is an experimental feature and may not work as intended. see TryAddRigidBody.
+     * @brief Attempts to register a body but reports failure instead of throwing.
+     * @param body Instance to register.
+     * @return true when the body is registered successfully.
      */
-    [[nodiscard]] bool TryRemoveRigidBody(void* body);
+    [[nodiscard]] bool TryAddRigidBody(IRigidBody* body);
+
+    /**
+     * @brief Attempts to remove a body but reports failure instead of throwing.
+     * @param body Instance to remove.
+     * @return true when the body is removed successfully.
+     */
+    [[nodiscard]] bool TryRemoveRigidBody(IRigidBody* body);
+
 private:
-    // helpers
     void ApplyGlobalForces();
-    void IntegrateBodies(const lambda::core::Real dt);
+    void IntegrateBodies(lambda::core::Real dt);
     void DetectCollisions();
     void ResolveCollisions();
     void ClearAccumulators();
 
-
-    double _simulationTime = 0.0;
+    double _simulationTime{0.0};
 };
+
+} // namespace lambda::physics

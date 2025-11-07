@@ -1,15 +1,29 @@
+// IRigidBody.hpp
+// Project Lambda - Physics rigid body contract definition
+// Copyright (C) 2025
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 #pragma once
 
-#include <array>      // std::array
-#include <cstdint>    // std::uint64_t
-#include "core/Real.hpp" 
-using namespace lambda::core;
+#include <core/Real.hpp>
+
+#include <array>
+#include <cstdint>
 
 namespace lambda::physics {
 
 /**
- * @brief Status codes for routine validation outcomes.
- * @note Exceptions are reserved for unrecoverable errors; use status codes for argument checks.
+ * @brief Status codes reported by rigid-body mutators and validators.
+ *
+ * Status values allow validation without resorting to exceptions for routine argument errors.
  */
 enum class RigidBodyStatus : std::uint8_t {
     OK = 0,
@@ -19,35 +33,34 @@ enum class RigidBodyStatus : std::uint8_t {
 };
 
 /**
- * @brief Utility: validates that mass is strictly positive and finite.
+ * @brief Validates that mass is strictly positive and finite.
  */
 [[nodiscard]] inline bool IsValidMass(lambda::core::Real mass) noexcept {
     try {
-        return (mass > Real{0.0});
+        return mass > lambda::core::Real{0.0};
     } catch (...) {
         return false;
     }
 }
 
 /**
- * @brief Utility: validates that the inverse mass is non-negative and finite.
+ * @brief Validates that inverse mass is non-negative and finite.
  */
 [[nodiscard]] inline bool IsValidInverseMass(lambda::core::Real invMass) noexcept {
     try {
-        return (invMass >= Real{0.0});
+        return invMass >= lambda::core::Real{0.0};
     } catch (...) {
         return false;
     }
+}
 
 /**
- * @brief Utility: validates that the position is finite and not NaN.
+ * @brief Validates that every component of the vector is finite.
  */
-[[nodiscard]] inline bool IsValidVector3(const std::array<lambda::core::Real,3>& v) noexcept {
+[[nodiscard]] inline bool IsValidVector3(const std::array<lambda::core::Real, 3>& value) noexcept {
     try {
-        for (const auto& component : v) {
-            // Just constructing verifies finiteness
-            Real value = component;
-            (void)value;
+        for (const auto& component : value) {
+            [[maybe_unused]] const auto probe = component;
         }
         return true;
     } catch (...) {
@@ -56,66 +69,59 @@ enum class RigidBodyStatus : std::uint8_t {
 }
 
 /**
- * @brief Rigid body interface describing the minimum state/contract for bodies.
- *
- * This is an interface (pure virtual) on purpose: it encodes the rules and required
- * accessors/modifiers without prescribing storage or algorithms. Concrete implementations
- * (e.g., BasicRigidBody, ArticulatedBody, SoftProxy) will implement these methods.
+ * @brief Rigid-body interface that exposes the minimal physical state contract.
  */
 class IRigidBody {
 public:
     virtual ~IRigidBody() = default;
 
     /**
-     * @brief Returns the body's mass (kg). Guaranteed to be strictly positive.
+     * @brief Returns the body's mass in kilograms.
      */
     [[nodiscard]] virtual lambda::core::Real GetMass() const noexcept = 0;
 
     /**
-     * @brief Sets the body's mass (kg).
-     * @param mass New mass value; must be finite and strictly greater than zero.
-     * @return RigidBodyStatus::OK on success; RigidBodyStatus::INVALID_MASS if validation fails.
-     * @note Implementations must NOT modify internal state on failure.
+     * @brief Sets the body's mass in kilograms.
+     * @param mass New positive mass value.
+     * @return Validation status describing whether @p mass was accepted.
      */
     [[nodiscard]] virtual RigidBodyStatus SetMass(lambda::core::Real mass) = 0;
 
     /**
-    * @brief Returns the body's position in world space (meters).
-    */
-    [[nodiscard]] virtual std::array<lambda::core::Real,3> GetPosition() const noexcept = 0;
-
-    /**
-    * @brief Sets the body's position in world space (meters).
-    * @param position New COM coordinates in meters.
-    * @return RigidBodyStatus::OK if valid; INVALID_POSITION otherwise.
-    */
-    [[nodiscard]] virtual RigidBodyStatus SetPosition(const std::array<lambda::core::Real,3>& position) = 0;
-
-    /**
-    * @brief Returns the body's linear velocity in world space (m/s).
-    */
-    [[nodiscard]] virtual std::array<lambda::core::Real,3> GetVelocity() const noexcept = 0;
-
-    /**
-    * @brief Sets the body's linear velocity in world space (m/s).
-    * @param velocity New velocity components (m/s).
-    * @return RigidBodyStatus::OK if valid; INVALID_VELOCITY otherwise.
-    */
-    [[nodiscard]] virtual RigidBodyStatus SetVelocity(const std::array<lambda::core::Real,3>& velocity) = 0;
-
-    /**
-     * @brief Set's the inertia tensor of the rigid body in local space (kg·m²).
-     * @param inertiaTensor New inertia tensor as a 3x3 matrix in row-major order.
-     * @return RigidBodyStatus::OK on success; appropriate error code on failure.
+     * @brief Returns the body's world-space position in meters.
      */
-    [[nodiscard]] virtual RigidBodyStatus SetInertiaTensor(const std::array<lambda::core::Real,9>& inertiaTensor) = 0;
+    [[nodiscard]] virtual std::array<lambda::core::Real, 3> GetPosition() const noexcept = 0;
 
     /**
-     * @brief Returns the body's inertia tensor in local space (kg·m²) as a 3x3 matrix in row-major order.
+     * @brief Sets the body's world-space position in meters.
+     * @param position New position written as {x, y, z}.
+     * @return Validation status describing whether @p position was accepted.
      */
-    [[nodiscard]] virtual std::array<lambda::core::Real,9> GetInertiaTensor() const noexcept = 0;
+    [[nodiscard]] virtual RigidBodyStatus SetPosition(const std::array<lambda::core::Real, 3>& position) = 0;
 
-    
-    
+    /**
+     * @brief Returns the body's linear velocity in meters per second.
+     */
+    [[nodiscard]] virtual std::array<lambda::core::Real, 3> GetVelocity() const noexcept = 0;
+
+    /**
+     * @brief Sets the body's linear velocity in meters per second.
+     * @param velocity New linear velocity written as {vx, vy, vz}.
+     * @return Validation status describing whether @p velocity was accepted.
+     */
+    [[nodiscard]] virtual RigidBodyStatus SetVelocity(const std::array<lambda::core::Real, 3>& velocity) = 0;
+
+    /**
+     * @brief Sets the inertia tensor expressed in local space (row-major 3x3).
+     * @param inertiaTensor New inertia tensor values.
+     * @return Validation status describing whether @p inertiaTensor was accepted.
+     */
+    [[nodiscard]] virtual RigidBodyStatus SetInertiaTensor(const std::array<lambda::core::Real, 9>& inertiaTensor) = 0;
+
+    /**
+     * @brief Returns the inertia tensor expressed in local space (row-major 3x3).
+     */
+    [[nodiscard]] virtual std::array<lambda::core::Real, 9> GetInertiaTensor() const noexcept = 0;
 };
+
 } // namespace lambda::physics

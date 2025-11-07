@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 /**
  * @brief Application entry point for the Project Lambda prototype.
  *
@@ -20,7 +19,5 @@
  * @return Zero on success, non-zero otherwise.
  */
 int main() {
-
-    
     return 0;
 }
