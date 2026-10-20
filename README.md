@@ -27,6 +27,19 @@ Answering that needs two things: a physics simulation that is deterministic and 
 
 ---
 
+## How the pieces fit
+| Layer | Repository | Role |
+|---|---|---|
+| Math | [kalon](https://github.com/smttyZ/kalon) | Every number, vector, matrix, and operation on them |
+| Simulation | [Lambda-Physics-Engine](https://github.com/smttyZ/Lambda-Physics-Engine) | A black box that steps the world forward |
+| Research | Project-Lambda (this repository) | Where agents run experiments and something is done with the results |
+
+**Prome**, the planned agent system, will live here. The name is short for *Prometheus*, after the AI in *Honkai Impact 3rd*.
+
+This repository still contains a prototype of the physics (`core/`, `physics/`). That work is moving into kalon and the engine; once it has, this repository will hold the agents, experiments, and paper.
+
+---
+
 ## Objectives
 - Build a deterministic rigid-body simulation where the same inputs always produce the same results.
 - Design agents that can run their own experiments in it: push objects, drop them, and record what happens.
