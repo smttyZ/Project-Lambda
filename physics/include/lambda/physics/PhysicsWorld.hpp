@@ -16,6 +16,7 @@
 #include <core/Clock.hpp>
 #include <core/Real.hpp>
 
+#include <array>
 #include <vector>
 
 namespace lambda::physics {
@@ -81,7 +82,8 @@ private:
      * @brief Integrates all bodies forward in time using semi-implicit Euler.
      * @param dt Time step in seconds.
      */
-    void IntegrateBodies(lambda::core::Real dt);
+    void IntegrateBodies(lambda::core::Real dt,
+                         const std::vector<std::array<lambda::core::Real, 3>>& externalForces);
 
     /**
      * @brief Detects collisions between rigid bodies.

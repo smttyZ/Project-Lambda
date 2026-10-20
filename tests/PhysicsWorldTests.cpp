@@ -149,3 +149,23 @@ TEST(PhysicsWorldTests, DeterministicSteppingProducesIdenticalResults) {
     EXPECT_DOUBLE_EQ(posA[1].Value(), posB[1].Value());
     EXPECT_DOUBLE_EQ(velA[1].Value(), velB[1].Value());
 }
+
+// Forces applied by the caller before Simulate() must act for the whole step.
+// Velocity Verlet evaluates forces at both ends of a step, so if a caller's
+// force were only counted at the start, a body held up by exactly its weight
+// would slowly sink.
+TEST(PhysicsWorldTests, ExternalForceIsHeldConstantAcrossStep) {
+    PhysicsWorld world;
+    auto body = std::make_unique<RigidBody>();
+    ASSERT_TRUE(ConfigureDynamicBody(*body, Real{2.0}));
+    ASSERT_TRUE(world.AddRigidBody(body.get()));
+
+    const Real dt{0.01};
+    for (int i = 0; i < 200; ++i) {
+        body->ApplyForce({Real{0.0}, G * body->GetMass(), Real{0.0}}); // cancels gravity
+        world.Simulate(dt);
+    }
+
+    EXPECT_NEAR(body->GetPosition()[1].Value(), 0.0, 1e-12);
+    EXPECT_NEAR(body->GetVelocity()[1].Value(), 0.0, 1e-12);
+}
