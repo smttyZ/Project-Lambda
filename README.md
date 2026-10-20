@@ -40,9 +40,6 @@ Answering that needs two things: a physics simulation that is deterministic and 
 | `core/`: strict `Real` type, `Vector3`, `Matrix3`, constants | Working |
 | `core/`: `Vector2`, `Vector4`, `Matrix4`, `Clock` | Interfaces declared, not yet implemented |
 | `physics/`: rigid bodies, sphere/AABB colliders, velocity Verlet integration | Builds; all 5 tests pass (integration, rotation, determinism). Collisions are not yet covered by tests |
-| `apps/cradle`: Newton's cradle demo | In progress |
-| `engine/`: renderer | Planned, no sources yet |
-| `prome/`: agent system | Planned, no sources yet |
 
 Linear motion uses **velocity Verlet**, which reproduces free fall exactly and keeps energy bounded in oscillating systems such as pendulums. That matters here because the integrator effectively defines the "laws" an agent can observe in the simulation.
 
@@ -51,11 +48,9 @@ The math layer has since been extracted into its own library, [kalon](https://gi
 ---
 
 ## Repository Structure
-- `core/`: header-only foundations: `Real`, `Vector2/3/4`, `Matrix3/4`, constants, clock, argument parsing.
+- `core/`: header-only foundations: `Real`, `Vector2/3/4`, `Matrix3/4`, constants, clock. This is the prototype's own copy; the maintained version of this math is [kalon](https://github.com/smttyZ/kalon).
 - `physics/`: rigid bodies, colliders, and `PhysicsWorld` (headers in `physics/include/lambda/physics/`).
 - `tests/`: GoogleTest suite for the physics world.
-- `apps/`: executables, including the Newton's cradle demo.
-- `engine/`, `prome/`: planned renderer and agent modules (build files only).
 - `paper/`: research notes and the Newton's cradle roadmap.
 - `scripts/`: formatting and lint helpers.
 - `STYLEGUIDE.md`: C++ style conventions for the project.
