@@ -22,6 +22,8 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <cstddef>
+#include <vector>
 
 namespace {
 
@@ -75,8 +77,19 @@ void PhysicsWorld::Simulate(lambda::core::Real dt) {
         dt = maxDt;
     }
 
+    // Forces applied by callers before this step are held constant across it:
+    // velocity Verlet evaluates forces at both ends of the step, so they are
+    // captured here and re-applied after positions move.
+    std::vector<std::array<lambda::core::Real, 3>> externalForces;
+    externalForces.reserve(_rigidBodies.size());
+    for (auto* rigidBody : _rigidBodies) {
+        externalForces.push_back(rigidBody != nullptr
+                                     ? rigidBody->GetAccumulatedForce()
+                                     : std::array<lambda::core::Real, 3>{});
+    }
+
     ApplyGlobalForces();
-    IntegrateBodies(dt);
+    IntegrateBodies(dt, externalForces);
     DetectCollisions();
     ResolveCollisions();
     _simulationTimeSeconds += static_cast<long double>(dt.Value());
@@ -149,11 +162,23 @@ void PhysicsWorld::ApplyGlobalForces() {
     }
 }
 
-void PhysicsWorld::IntegrateBodies(lambda::core::Real dt) {
+// Linear motion uses velocity Verlet:
+//   x(t+dt) = x + v*dt + 1/2*a(t)*dt^2
+//   v(t+dt) = v + 1/2*(a(t) + a(t+dt))*dt
+// with forces re-evaluated at the new positions for a(t+dt). Angular motion
+// is unchanged (semi-implicit Euler on angular velocity, exponential map
+// for orientation).
+void PhysicsWorld::IntegrateBodies(lambda::core::Real dt,
+                                   const std::vector<std::array<lambda::core::Real, 3>>& externalForces) {
     const auto zero = lambda::core::Real{0.0};
+    const auto half = lambda::core::Real{0.5};
     const auto maxAngularVelocity = lambda::core::Real{100.0};
 
-    for (auto* rigidBody : _rigidBodies) {
+    std::vector<std::array<lambda::core::Real, 3>> startAcceleration(_rigidBodies.size());
+
+    // Pass 1: move positions using a(t); integrate rotation.
+    for (std::size_t i = 0; i < _rigidBodies.size(); ++i) {
+        auto* rigidBody = _rigidBodies[i];
         if (rigidBody == nullptr) {
             continue;
         }
@@ -170,17 +195,14 @@ void PhysicsWorld::IntegrateBodies(lambda::core::Real dt) {
             force[2] * inverseMass
         };
 
-        auto linearVelocity = rigidBody->GetVelocity();
-        linearVelocity[0] = linearVelocity[0] + linearAcceleration[0] * dt;
-        linearVelocity[1] = linearVelocity[1] + linearAcceleration[1] * dt;
-        linearVelocity[2] = linearVelocity[2] + linearAcceleration[2] * dt;
-        rigidBody->SetVelocity(linearVelocity);
+        startAcceleration[i] = linearAcceleration;
 
+        const auto linearVelocity = rigidBody->GetVelocity();
         auto position = rigidBody->GetPosition();
-        position[0] = position[0] + linearVelocity[0] * dt;
-        position[1] = position[1] + linearVelocity[1] * dt;
-        position[2] = position[2] + linearVelocity[2] * dt;
-        rigidBody->SetPosition(position);
+        for (std::size_t k = 0; k < 3; ++k) {
+            position[k] = position[k] + linearVelocity[k] * dt + half * linearAcceleration[k] * dt * dt;
+        }
+        static_cast<void>(rigidBody->SetPosition(position));
 
         const auto torque = ToVector3(rigidBody->GetAccumulatedTorque());
         const lambda::core::Matrix3 inverseInertia{rigidBody->GetInverseInertiaTensor()};
@@ -194,7 +216,7 @@ void PhysicsWorld::IntegrateBodies(lambda::core::Real dt) {
         angularVelocity[0] = ClampSymmetric(angularVelocity[0], maxAngularVelocity);
         angularVelocity[1] = ClampSymmetric(angularVelocity[1], maxAngularVelocity);
         angularVelocity[2] = ClampSymmetric(angularVelocity[2], maxAngularVelocity);
-        rigidBody->SetAngularVelocity(angularVelocity);
+        static_cast<void>(rigidBody->SetAngularVelocity(angularVelocity));
 
         lambda::core::Matrix3 orientation{rigidBody->GetOrientationMatrix()};
         const lambda::core::Matrix3 omegaCross(
@@ -208,6 +230,30 @@ void PhysicsWorld::IntegrateBodies(lambda::core::Real dt) {
         orientation.Orthonormalize();
         static_cast<void>(rigidBody->SetOrientationMatrix(ToArray(orientation)));
 
+        rigidBody->ClearAccumulators();
+        rigidBody->ApplyForce(externalForces[i]);
+    }
+
+    // Pass 2: forces at the new positions give a(t+dt); finish the velocity update.
+    ApplyGlobalForces();
+    for (std::size_t i = 0; i < _rigidBodies.size(); ++i) {
+        auto* rigidBody = _rigidBodies[i];
+        if (rigidBody == nullptr) {
+            continue;
+        }
+
+        const auto inverseMass = rigidBody->GetInverseMass();
+        if (inverseMass == zero) {
+            continue;
+        }
+
+        const auto force = rigidBody->GetAccumulatedForce();
+        auto linearVelocity = rigidBody->GetVelocity();
+        for (std::size_t k = 0; k < 3; ++k) {
+            const auto endAcceleration = force[k] * inverseMass;
+            linearVelocity[k] = linearVelocity[k] + half * (startAcceleration[i][k] + endAcceleration) * dt;
+        }
+        static_cast<void>(rigidBody->SetVelocity(linearVelocity));
         rigidBody->ClearAccumulators();
     }
 }

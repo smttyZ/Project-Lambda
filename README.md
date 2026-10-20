@@ -15,32 +15,50 @@ limitations under the License.
 
 <h1 align="center">Project Lambda: Can Artificial Agents Rediscover the Laws of Physics?</h1>
 
-**Author:** Henry H. Hicks  
-**Institution:** Tallahassee State College  
-**Year:** 2025  
+**Author:** Henry H. Hicks (Tallahassee State College)  
+**Started:** 2025  
 
 ---
 
 ## Overview
-*Project Lambda* is an open research initiative exploring whether artificial agents can independently rediscover fundamental physical principles through observation, interaction, and adaptive reasoning.  
+Project Lambda is a personal research project built around one question: if an artificial agent can only observe and interact with a simulated world, can it work out the physical laws that govern that world?
 
-The project seeks to unify concepts from computational neuroscience, physics, and artificial intelligence to examine how machine systems may arrive at empirical laws similar to those discovered by human scientists.
+Answering that needs two things: a physics simulation that is deterministic and trustworthy enough to experiment in, and agents that run experiments inside it. This repository is where both started. So far the work has gone into the physics side.
 
 ---
 
 ## Objectives
-- Design artificial agents capable of self-guided experimentation and observation.  
-- Analyze the emergence of symbolic representations and laws from raw environmental data.  
-- Investigate the limits of synthetic intelligence in rediscovering established physical principles.
+- Build a deterministic rigid-body simulation where the same inputs always produce the same results.
+- Design agents that can run their own experiments in it: push objects, drop them, and record what happens.
+- Study whether, and how, those agents arrive at relationships like constant gravitational acceleration or conservation of momentum, and where that breaks down.
+
+---
+
+## Status
+| Area | State |
+|---|---|
+| `core/`: strict `Real` type, `Vector3`, `Matrix3`, constants | Working |
+| `core/`: `Vector2`, `Vector4`, `Matrix4`, `Clock` | Interfaces declared, not yet implemented |
+| `physics/`: rigid bodies, sphere/AABB colliders, velocity Verlet integration | Builds; all 5 tests pass (integration, rotation, determinism). Collisions are not yet covered by tests |
+| `apps/cradle`: Newton's cradle demo | In progress |
+| `engine/`: renderer | Planned, no sources yet |
+| `prome/`: agent system | Planned, no sources yet |
+
+Linear motion uses **velocity Verlet**, which reproduces free fall exactly and keeps energy bounded in oscillating systems such as pendulums. That matters here because the integrator effectively defines the "laws" an agent can observe in the simulation.
+
+The math layer has since been extracted into its own library, [kalon](https://github.com/smttyZ/kalon), and a new engine built on it is in progress at [Lambda-Physics-Engine](https://github.com/smttyZ/Lambda-Physics-Engine).
 
 ---
 
 ## Repository Structure
-- `include/` — Public headers exposed per domain (`math/`, `core/`, …).  
-- `src/` — Engine and experiment implementations (entry point in `src/main.cpp`).  
-- `scripts/` — Tooling helpers for formatting and static analysis.  
-- `paper/` — Research notes, references, and experiment reports.  
-- `STYLEGUIDE.md` — Canonical Project Lambda C++ style manifest.
+- `core/`: header-only foundations: `Real`, `Vector2/3/4`, `Matrix3/4`, constants, clock, argument parsing.
+- `physics/`: rigid bodies, colliders, and `PhysicsWorld` (headers in `physics/include/lambda/physics/`).
+- `tests/`: GoogleTest suite for the physics world.
+- `apps/`: executables, including the Newton's cradle demo.
+- `engine/`, `prome/`: planned renderer and agent modules (build files only).
+- `paper/`: research notes and the Newton's cradle roadmap.
+- `scripts/`: formatting and lint helpers.
+- `STYLEGUIDE.md`: C++ style conventions for the project.
 
 ---
 
@@ -49,8 +67,8 @@ The project seeks to unify concepts from computational neuroscience, physics, an
 ### Prerequisites
 - CMake ≥ 3.20
 - A C++23 compiler (clang++ 17 / g++ 13 or newer)
-- GLFW 3.x and GoogleTest discoverable by CMake
-- `clang-format` and `clang-tidy` for style enforcement
+- Network access on first configure (GoogleTest is fetched automatically)
+- `clang-format` and `clang-tidy` for the format and lint targets
 
 ### Configure & Build
 ```bash
@@ -66,34 +84,31 @@ ctest --output-on-failure --test-dir build
 ---
 
 ## Development Workflow
-- `cmake --build build --target format` — Apply the project clang-format profile.
-- `cmake --build build --target lint` — Execute clang-tidy using `.clang-tidy`.
-- `scripts/format.sh` / `scripts/lint.sh` — Direct access to the tooling from any shell.
-- Follow `STYLEGUIDE.md` for naming, documentation, and architectural rules. Extend the guide when introducing new patterns.
+- `cmake --build build --target format`: apply the project's clang-format profile.
+- `cmake --build build --target lint`: run clang-tidy using `.clang-tidy`.
+- `scripts/format.sh` / `scripts/lint.sh`: the same tools, runnable from any shell.
+- Follow `STYLEGUIDE.md` for naming, documentation, and structure.
 
 ---
 
-## License and Attribution
-This project is licensed under the **Apache License 2.0**.  
-All modifications, extensions, or derivative works must be properly documented to preserve the scientific integrity and intent of the original research.  
+## License
+Licensed under the **Apache License 2.0**. See [LICENSE](LICENSE) and [NOTICE.md](NOTICE.md).
 
 ---
 
 ## Citation
-If you reference or build upon this work, please cite as:
+If you reference this project, please link to this repository:
 
 > Hicks, H. H. (2025). *Project Lambda: Can Artificial Agents Rediscover the Laws of Physics?*  
-> Tallahassee State College.  
-> [https://github.com/henryhicks/project-lambda](https://github.com/henryhicks/project-lambda)
+> [https://github.com/smttyZ/Project-Lambda](https://github.com/smttyZ/Project-Lambda)
 
 ---
 
 ## Contact
-For correspondence, inquiries, or collaboration requests, please contact:  
-**Henry H. Hicks** — *Tallahassee State College*  
-**Email:** Hicks886@mymail.tsc.fl.edu  
+**Henry H. Hicks**  
+**Email:** smttyz4@gmail.com
 
+---
 
-
-> *"There comes a time when the mind takes a higher plane of knowledge but can never prove how it got there."*  
-> — Albert Einstein
+> *"There comes a point where the mind takes a higher plane of knowledge, but can never prove how it got there."*  
+> — attributed to Albert Einstein, as quoted in R. W. Clark, *Einstein: The Life and Times*

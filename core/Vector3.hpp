@@ -15,6 +15,8 @@
 
 #include <core/Real.hpp>
 
+#include <algorithm>
+#include <cmath>
 #include <cstddef>
 
 namespace lambda::core {
@@ -310,5 +312,90 @@ private:
     Real _y{};
     Real _z{};
 };
+
+// ---------------------------------------------------------------------------
+// Definitions
+// ---------------------------------------------------------------------------
+
+inline Real Vector3::LengthSquared() const noexcept {
+    return _x * _x + _y * _y + _z * _z;
+}
+
+inline Real Vector3::Length() const noexcept {
+    return Real{std::sqrt(LengthSquared().Value())};
+}
+
+/// A zero-length vector is returned unchanged (there is no direction to keep).
+inline Vector3 Vector3::Normalized() const noexcept {
+    const Real len = Length();
+    if (len == Real{0.0}) {
+        return *this;
+    }
+    return Vector3{_x / len, _y / len, _z / len};
+}
+
+inline Real Vector3::Dot(const Vector3& other) const noexcept {
+    return _x * other._x + _y * other._y + _z * other._z;
+}
+
+inline Vector3 Vector3::Cross(const Vector3& other) const noexcept {
+    return Vector3{
+        _y * other._z - _z * other._y,
+        _z * other._x - _x * other._z,
+        _x * other._y - _y * other._x
+    };
+}
+
+/// Angle in radians, in [0, pi]. Returns 0 if either vector has zero length.
+inline Real Vector3::AngleBetween(const Vector3& other) const noexcept {
+    const Real denom = Length() * other.Length();
+    if (denom == Real{0.0}) {
+        return Real{0.0};
+    }
+    const double c = std::clamp((Dot(other) / denom).Value(), -1.0, 1.0);
+    return Real{std::acos(c)};
+}
+
+inline Vector3 Vector3::operator-() const noexcept {
+    return Vector3{-_x, -_y, -_z};
+}
+
+inline Vector3 Vector3::operator+(const Vector3& other) const noexcept {
+    return Vector3{_x + other._x, _y + other._y, _z + other._z};
+}
+
+inline Vector3 Vector3::operator-(const Vector3& other) const noexcept {
+    return Vector3{_x - other._x, _y - other._y, _z - other._z};
+}
+
+/// Component-wise (Hadamard) product.
+inline Vector3 Vector3::operator*(const Vector3& other) const noexcept {
+    return Vector3{_x * other._x, _y * other._y, _z * other._z};
+}
+
+/// Component-wise division.
+inline Vector3 Vector3::operator/(const Vector3& other) const noexcept {
+    return Vector3{_x / other._x, _y / other._y, _z / other._z};
+}
+
+inline Vector3& Vector3::operator+=(const Vector3& other) noexcept {
+    *this = *this + other;
+    return *this;
+}
+
+inline Vector3& Vector3::operator-=(const Vector3& other) noexcept {
+    *this = *this - other;
+    return *this;
+}
+
+inline Vector3& Vector3::operator*=(const Vector3& other) noexcept {
+    *this = *this * other;
+    return *this;
+}
+
+inline Vector3& Vector3::operator/=(const Vector3& other) noexcept {
+    *this = *this / other;
+    return *this;
+}
 
 } // namespace lambda::core

@@ -331,8 +331,6 @@ private:
     Real _m[3][3]{};  // Row-major storage
 };
 
-} // namespace lambda::core
-
 inline void Matrix3::Orthonormalize() noexcept {
     const auto makeSafeUnit = [](const Vector3& candidate, const Vector3& fallback) noexcept -> Vector3 {
         const auto epsilon = Real{1e-8};
@@ -393,3 +391,137 @@ inline Matrix3 Matrix3::Exp(const Matrix3& skew) noexcept {
 
     return identity + (skew * sinCoeff) + (skewSquared * cosCoeff);
 }
+
+// ---------------------------------------------------------------------------
+// Definitions
+// ---------------------------------------------------------------------------
+
+inline Vector3 Matrix3::GetRow(std::size_t row) const noexcept {
+    return Vector3{_m[row][0], _m[row][1], _m[row][2]};
+}
+
+inline Vector3 Matrix3::GetColumn(std::size_t col) const noexcept {
+    return Vector3{_m[0][col], _m[1][col], _m[2][col]};
+}
+
+inline void Matrix3::SetRow(std::size_t row, const Vector3& values) noexcept {
+    _m[row][0] = values.GetX();
+    _m[row][1] = values.GetY();
+    _m[row][2] = values.GetZ();
+}
+
+inline void Matrix3::SetColumn(std::size_t col, const Vector3& values) noexcept {
+    _m[0][col] = values.GetX();
+    _m[1][col] = values.GetY();
+    _m[2][col] = values.GetZ();
+}
+
+inline Matrix3 Matrix3::Transposed() const noexcept {
+    return Matrix3{
+        _m[0][0], _m[1][0], _m[2][0],
+        _m[0][1], _m[1][1], _m[2][1],
+        _m[0][2], _m[1][2], _m[2][2]
+    };
+}
+
+inline Real Matrix3::Determinant() const noexcept {
+    return _m[0][0] * (_m[1][1] * _m[2][2] - _m[1][2] * _m[2][1])
+         - _m[0][1] * (_m[1][0] * _m[2][2] - _m[1][2] * _m[2][0])
+         + _m[0][2] * (_m[1][0] * _m[2][1] - _m[1][1] * _m[2][0]);
+}
+
+/// Inverse via the adjugate. For a singular matrix (determinant 0) the
+/// division by zero throws inside Real; since this function is noexcept,
+/// that terminates the program.
+inline Matrix3 Matrix3::Inverted() const noexcept {
+    const Real det = Determinant();
+    const Matrix3 adjugate{
+        _m[1][1] * _m[2][2] - _m[1][2] * _m[2][1],
+        _m[0][2] * _m[2][1] - _m[0][1] * _m[2][2],
+        _m[0][1] * _m[1][2] - _m[0][2] * _m[1][1],
+
+        _m[1][2] * _m[2][0] - _m[1][0] * _m[2][2],
+        _m[0][0] * _m[2][2] - _m[0][2] * _m[2][0],
+        _m[0][2] * _m[1][0] - _m[0][0] * _m[1][2],
+
+        _m[1][0] * _m[2][1] - _m[1][1] * _m[2][0],
+        _m[0][1] * _m[2][0] - _m[0][0] * _m[2][1],
+        _m[0][0] * _m[1][1] - _m[0][1] * _m[1][0]
+    };
+    return adjugate / det;
+}
+
+inline Matrix3 Matrix3::operator-() const noexcept {
+    return *this * Real{-1.0};
+}
+
+inline Matrix3 Matrix3::operator+(const Matrix3& other) const noexcept {
+    Matrix3 r{};
+    for (std::size_t i = 0; i < 3; ++i)
+        for (std::size_t j = 0; j < 3; ++j)
+            r._m[i][j] = _m[i][j] + other._m[i][j];
+    return r;
+}
+
+inline Matrix3 Matrix3::operator-(const Matrix3& other) const noexcept {
+    Matrix3 r{};
+    for (std::size_t i = 0; i < 3; ++i)
+        for (std::size_t j = 0; j < 3; ++j)
+            r._m[i][j] = _m[i][j] - other._m[i][j];
+    return r;
+}
+
+inline Matrix3 Matrix3::operator*(const Matrix3& other) const noexcept {
+    Matrix3 r{};
+    for (std::size_t i = 0; i < 3; ++i)
+        for (std::size_t j = 0; j < 3; ++j)
+            r._m[i][j] = _m[i][0] * other._m[0][j] + _m[i][1] * other._m[1][j] + _m[i][2] * other._m[2][j];
+    return r;
+}
+
+inline Vector3 Matrix3::operator*(const Vector3& vec) const noexcept {
+    return Vector3{GetRow(0).Dot(vec), GetRow(1).Dot(vec), GetRow(2).Dot(vec)};
+}
+
+inline Matrix3 Matrix3::operator*(Real scalar) const noexcept {
+    Matrix3 r{};
+    for (std::size_t i = 0; i < 3; ++i)
+        for (std::size_t j = 0; j < 3; ++j)
+            r._m[i][j] = _m[i][j] * scalar;
+    return r;
+}
+
+inline Matrix3 Matrix3::operator/(Real scalar) const noexcept {
+    Matrix3 r{};
+    for (std::size_t i = 0; i < 3; ++i)
+        for (std::size_t j = 0; j < 3; ++j)
+            r._m[i][j] = _m[i][j] / scalar;
+    return r;
+}
+
+inline Matrix3& Matrix3::operator+=(const Matrix3& other) noexcept {
+    *this = *this + other;
+    return *this;
+}
+
+inline Matrix3& Matrix3::operator-=(const Matrix3& other) noexcept {
+    *this = *this - other;
+    return *this;
+}
+
+inline Matrix3& Matrix3::operator*=(const Matrix3& other) noexcept {
+    *this = *this * other;
+    return *this;
+}
+
+inline Matrix3& Matrix3::operator*=(Real scalar) noexcept {
+    *this = *this * scalar;
+    return *this;
+}
+
+inline Matrix3& Matrix3::operator/=(Real scalar) noexcept {
+    *this = *this / scalar;
+    return *this;
+}
+
+} // namespace lambda::core
