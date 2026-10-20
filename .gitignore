@@ -13,3 +13,6 @@
 
 # Temporary
 /.cache/
+
+# macOS
+.DS_Store
