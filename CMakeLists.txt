@@ -42,13 +42,6 @@ FetchContent_MakeAvailable(googletest)
 add_subdirectory(core)
 add_subdirectory(physics)
 
-# Modules that don't build yet: engine and prome have no sources, and the apps
-# are unfinished. Their CMakeLists describe the intended targets; enable each
-# one once it's ready.
-#   add_subdirectory(engine)   # renderer (RenderPipeline, SceneGraph)
-#   add_subdirectory(prome)    # agent system (AgentSystem, BehaviorGraph)
-#   add_subdirectory(apps)     # `lambda` app + Newton's cradle demo (in progress)
-
 enable_testing()
 add_subdirectory(tests)
 
