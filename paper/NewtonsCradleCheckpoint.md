@@ -1,5 +1,7 @@
 # Newton's Cradle Checkpoint Plan
 
+> **Note:** planning notes from November 2025. The "current state" sections describe the repository at that time and are out of date; see the [README](../README.md) for current status. The Newton's cradle work has since moved to [Lambda-Physics-Engine](https://github.com/smttyZ/Lambda-Physics-Engine) as a scene.
+
 ## Goal
 - Deliver a real-time, research-grade Newton's Cradle demo: \(N\) identical spheres, equal string lengths, accurate momentum transfer, camera + instrumentation, and reproducible logs.
 - Run inside the Project Lambda toolchain (CMake targets + tests) so downstream agents can extend it without patching build scripts.
