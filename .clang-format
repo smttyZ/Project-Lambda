@@ -49,7 +49,7 @@ IncludeCategories:
     Priority: 5
 Cpp11BracedListStyle: true
 NamespaceIndentation: All
-ReflowComments: false
+ReflowComments: IndentOnly
 SortUsingDeclarations: true
 SpacesInAngles: false
 SpaceBeforeRangeBasedForLoopColon: true
