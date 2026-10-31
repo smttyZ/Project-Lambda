@@ -68,6 +68,7 @@ initialization (`{}`) for aggregates by default.
 - **Factories**: `MakeX` or `FromX`.
 - **Members**: Public data members are PascalCase; private members carry a leading underscore (`_position`).
 - **Variables**: Locals and parameters use `camelCase`. Constants are ALL_CAPS. Global variables start with `Global` and are rare.
+  - "Constants" means every `const` or `constexpr` variable, locals included (`const Real LEN = Magnitude();`), so a constant never blends in with a variable.
 - **Macros**: ALL_CAPS with a `LAMBDA_` prefix to avoid collision.
 - **Tests**: Follow `DomainScenario_Result` with underscores (`VectorNormalization_ZeroVector_NoChange`).
 
@@ -126,6 +127,10 @@ private:
 - Structure GTest suites using `TEST_F` or `TEST_P` when shared fixtures make behavior clearer.
 - Every new API ships with edge-case coverage—consider negative inputs, boundary values, and degenerate geometry.
 - Run `ctest --output-on-failure --test-dir build` before submission and capture the result in merge requests.
+
+### Exceptions
+- **GoogleTest names.** GoogleTest asks that test suite and test names contain no underscores: `TEST(Suite, Name)` generates a class named `Suite_Name_Test`, so underscores can make two tests collide or form identifiers C++ reserves ([GoogleTest FAQ](https://google.github.io/googletest/faq.html)). Its rule wins over the `DomainScenario_Result` pattern above: name the suite after the unit under test, and the test in PascalCase describing the scenario and result, e.g. `TEST(Vector3, NormalizingZeroVectorIsANoOp)`.
+- **Single-domain repos.** A repo that is a single domain (kalon) keeps its tests flat in `tests/` rather than `tests/<domain>/`.
 
 ## 9. Tooling and Workflow
 - `clang-format` and `clang-tidy` configurations will align with this guide; run formatting before committing.
