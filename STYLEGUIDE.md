@@ -27,12 +27,12 @@ limitations under the License.
 
 ```cpp
 namespace lambda::math {
-Real ComputeMagnitude(Vector3 value) {
-    if (value.LengthSquared() == Real{}) {
-        return Real{0};
+    Real ComputeMagnitude(Vector3 value) {
+        if (value.LengthSquared() == Real{}) {
+            return Real{0};
+        }
+        return value.Length();
     }
-    return value.Length();
-}
 } // namespace lambda::math
 ```
 
