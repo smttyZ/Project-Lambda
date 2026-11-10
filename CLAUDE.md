@@ -1,25 +1,32 @@
 # Project Lambda workspace
 
 Henry is building Project Lambda, a deterministic physics simulation and research
-platform, to learn. Three repos live side by side here:
+platform, to learn. Four repos live side by side here:
 
 - `kalon/`: header-only C++23 math library. Strongly typed: dimensions (L, M, T)
   are checked at compile time. You use it; you don't run it.
 - `lambda-physics-engine/`: black-box solver. Takes inputs, steps, returns outputs.
   Pulls kalon in as a git submodule.
-- `project-lambda/`: the orchestrator (name not final): scenes, agents (prome),
-  experiments. Its `core/` and `physics/` folders are an obsolete prototype.
+- `taxis/`: the orchestrator, the layer above the engine: sets up a simulation,
+  runs it, and collects the results. Its design is not started, so what goes
+  inside it (scenes or something else) is undecided. Empty until then.
+- `project-lambda/`: the umbrella for the whole research project: this file, the
+  style guide, the paper, results, and the showcase README. Its `core/` and
+  `physics/` folders are an obsolete prototype.
+
+prome (the agents) joins later as another module.
 
 On Windows the folders are named `Lambda-Physics-Engine/` and `Project-Lambda/`.
 
 First milestone: a two-body Kepler orbit, printed as text.
 
 ## Status
-kalon is the only active repo. The engine and the orchestrator are intentionally
-out of date: their current structure (scenes, the Newton's cradle, the CLI) was
-built before kalon existed and may not survive. Don't clean them up, refactor them,
-or build on that structure unless Henry asks. When kalon changes, only keep the
-engine building against it.
+kalon is the only active repo. The engine and the prototype in `project-lambda/`
+are intentionally out of date: their current structure (scenes, the Newton's cradle,
+the CLI) was built before kalon existed and may not survive. Don't clean them up,
+refactor them, or build on that structure unless Henry asks. When kalon changes,
+only keep the engine building against it. Don't add code to taxis until Henry
+starts orchestrator work.
 
 ## Who decides what
 - Design decisions are Henry's: type design, which equations the engine uses,
@@ -33,7 +40,7 @@ engine building against it.
 - C++23. SI units inside the simulation; convert only at the boundaries.
 - Numbers are `double` via `kalon::Real`. No `long double`.
 - Determinism: same inputs give the same results on every machine.
-- Style: `STYLEGUIDE.md`, `.clang-format` and `.clang-tidy` in the orchestrator repo
+- Style: `STYLEGUIDE.md`, `.clang-format` and `.clang-tidy` in `project-lambda/`
   are the source of truth. kalon carries copies; change both together.
 
 ## Workflow
@@ -53,18 +60,16 @@ engine building against it.
 - GoogleTest comes in through CMake FetchContent, so there is nothing to install.
 
 ## Where this file lives
-The real file is `CLAUDE.md` in the orchestrator repo, so git keeps every machine
+The real file is `CLAUDE.md` in the `project-lambda/` repo, so git keeps every machine
 in sync. Each machine's workspace folder (`lambda/`) has a one-line `CLAUDE.md`
 that imports it: `@project-lambda/CLAUDE.md` (Windows: `@Project-Lambda/CLAUDE.md`).
 Edit this file, not the stub.
 
 ## Open TODOs
-- Rename the orchestrator (currently the folder `project-lambda/`). Henry wants a
-  proper name; "project-lambda" is hard to refer to. Until then, call it "the
-  orchestrator". When renaming, update links to it (e.g. kalon/README.md points at
-  github.com/smttyZ/Project-Lambda), the repo list above, and each machine's stub.
+- MacBook: clone taxis into `~/CLionProjects/lambda/`, pull `project-lambda/`, and
+  check the workspace stub is the one line `@project-lambda/CLAUDE.md`.
 
 ## Design doc
 The design lives in a Google Doc, "Project Lambda: Design" (Part I system,
-II kalon, III engine, IV orchestrator). Sections marked [Draft for review]
+II kalon, III engine, IV taxis). Sections marked [Draft for review]
 aren't approved yet. Nothing merges until its decision is written there.
