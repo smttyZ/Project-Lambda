@@ -7,8 +7,9 @@ platform, to learn. Four repos live side by side here:
   are checked at compile time. You use it; you don't run it.
 - `lambda-physics-engine/`: black-box solver. Takes inputs, steps, returns outputs.
   Pulls kalon in as a git submodule.
-- `taxis/`: the orchestrator: scenes and experiments. An empty placeholder until
-  orchestrator work starts.
+- `taxis/`: the orchestrator, the layer above the engine: sets up a simulation,
+  runs it, and collects the results. Its design is not started, so what goes
+  inside it (scenes or something else) is undecided. Empty until then.
 - `project-lambda/`: the umbrella for the whole research project: this file, the
   style guide, the paper, results, and the showcase README. Its `core/` and
   `physics/` folders are an obsolete prototype.

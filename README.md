@@ -32,7 +32,7 @@ Answering that needs two things: a physics simulation that is deterministic and 
 |---|---|---|
 | Math | [kalon](https://github.com/smttyZ/kalon) | Every number, vector, matrix, and operation on them |
 | Simulation | [Lambda-Physics-Engine](https://github.com/smttyZ/Lambda-Physics-Engine) | A black box that steps the world forward |
-| Orchestration | [taxis](https://github.com/smttyZ/taxis) | Scenes and experiments: arranges what the engine simulates. Not started yet |
+| Orchestration | [taxis](https://github.com/smttyZ/taxis) | The layer above the engine: sets up a simulation, runs it, and collects the results. Design not started |
 | Research | Project-Lambda (this repository) | The umbrella for the whole project: the paper, results, and what was learned |
 
 **Prome**, the planned agent system, will join later as its own module. The name is short for *Prometheus*, after the AI in *Honkai Impact 3rd*.
